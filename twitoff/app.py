@@ -1,7 +1,9 @@
 """Main app/routing file for Twitoff"""
 
+from os import getenv
 from flask import Flask, render_template
-from .models import DB, User, insert_example_users
+from .models import DB, User
+from .twitter import add_or_update_user
 
 
 # creates application
@@ -10,7 +12,7 @@ def create_app():
     app = Flask(__name__)
 
     # database and app configurations
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
+    app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # initilizing database
@@ -19,12 +21,23 @@ def create_app():
     # decorator listens for specific endpoint visits
     @app.route('/')  # http://127.0.0.1:5000/
     def root():
+        # renders base.html template and passes down title and users
+        return render_template('base.html', title="Home", users=User.query.all())
+
+    @app.route('/update')  # http://127.0.0.1:5000/update
+    def update():
+        insert_example_users()
+        return render_template('base.html', title="Home", users=User.query.all())
+
+    @app.route('/reset')  # http://127.0.0.1:5000/reset
+    def reset():
         # we must create the database
         DB.drop_all()
         DB.create_all()
-        # avoiding error since we are dropping all values - no duplicate users
-        insert_example_users()
-        # renders base.html template and passes down title and users
-        return render_template('base.html', title="home", users=User.query.all())
-
+        return render_template('base.html', title="Home")
     return app
+
+
+def insert_example_users():
+    add_or_update_user('elonmusk')
+    add_or_update_user('nasa')
