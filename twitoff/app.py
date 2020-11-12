@@ -45,18 +45,18 @@ def create_app():
 
     @app.route('/compare', methods=["POST"])  # http://127.0.0.1:5000/compare
     def compare():
-        user0, user1 = sorted(
+        user1, user2 = sorted(
             [request.values['user1'], request.values['user2']])
 
-        if user0 == user1:
+        if user1 == user2:
             message = "Cannot compare users to themselves!"
 
         else:
             prediction = predict_user(
-                user0, user1, request.values['tweet_text'])
+                user1, user2, request.values['tweet_text'])
             message = '{} is more likely to be said by {} than {}'.format(
-                request.values["tweet_text"], user1 if prediction else user0,
-                user0 if prediction else user1
+                request.values["tweet_text"], user1 if prediction else user2,
+                user2 if prediction else user1
             )
 
         return render_template('prediction.html', title="Prediction", message=message)
