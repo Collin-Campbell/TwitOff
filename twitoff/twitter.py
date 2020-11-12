@@ -29,7 +29,7 @@ def add_or_update_user(username):
         # grabs tweets from twitter_user
         tweets = twitter_user.timeline(
             count=200, exclude_replies=True, include_rts=False,
-            tweet_mode="extended"
+            tweet_mode="extended", since_id=db_user.newest_tweet_id
         )
 
         # adds newest tweet to db_user.newest_tweet_id
@@ -52,3 +52,9 @@ def add_or_update_user(username):
     # commits changes after try has completed
     else:
         DB.session.commit()
+
+
+def update_all_users():
+    """Update all Tweets for all Users in the User table."""
+    for user in User.query.all():
+        add_or_update_user(user.name)
